@@ -1,0 +1,24 @@
+{
+    "fileFormatVersion": "1.0.0",
+    "itemInfoEntries": {
+        "61B4D687-7E54-4D28-9B33-0EF94C374931": {
+            "author": "com.apple.CoreML",
+            "description": "CoreML Model Specification",
+            "name": "ShapesClassification.mlmodel",
+            "path": "com.apple.CoreML/ShapesClassification.mlmodel"
+        },
+        "787938B7-25AA-44DC-9C6F-A37C1B296D19": {
+            "author": "com.apple.CoreML",
+            "description": "External FeatureDescription Overlay",
+            "name": "FeatureDescriptions.json",
+            "path": "com.apple.CoreML/FeatureDescriptions.json"
+        },
+        "DFAAA36B-4301-4D0D-8E96-C121F32D0513": {
+            "author": "com.apple.CoreML",
+            "description": "External Metadata Overlay",
+            "name": "Metadata.json",
+            "path": "com.apple.CoreML/Metadata.json"
+        }
+    },
+    "rootModelIdentifier": "61B4D687-7E54-4D28-9B33-0EF94C374931"
+}

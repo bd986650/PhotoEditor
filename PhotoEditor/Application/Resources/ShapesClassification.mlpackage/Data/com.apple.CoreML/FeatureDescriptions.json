@@ -1,0 +1,18 @@
+{
+  "Outputs" : {
+    "classLabel" : {
+      "MLFeatureShortDescription" : "Most likely image category"
+    },
+    "classLabelProbs" : {
+      "MLFeatureShortDescription" : "Probability of each category"
+    }
+  },
+  "Inputs" : {
+    "image" : {
+      "MLFeatureShortDescription" : "Input image to be classified"
+    }
+  },
+  "TrainingInputs" : {
+
+  }
+}
