@@ -33,18 +33,18 @@ struct PermissionsView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color.permissionsBackground.edgesIgnoringSafeArea(.all)
+                Color.black
+                    .edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 16) {
                     
-                    // MARK: duck.mp4 size is 110KB while duck.json is 242KB + Lottie engine size
                     PlayerView(
                         asset: AVAsset(url: Bundle.main.url(forResource: "duck", withExtension: "mp4")!),
                         size: Binding.constant(CGSize(width: 150, height: 150))
                     )
                     .frame(width: 150, height: 150)
                     
-                    Text("Access Your Photos and Videos")
+                    Text(self.status == true ? "Edit Your Photos and Videos" : "Access Your Photos and Videos")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.light)
                         .padding(.bottom, 8)
@@ -75,7 +75,7 @@ struct PermissionsView: View {
                         .frame(width: geometry.size.width - 96)
                         .font(.system(size: 17, weight: .bold))
                         .padding()
-                        .background(self.status == false ? Color.gray : Color.blue)
+                        .background(self.status == false ? Color.permissionsBackground : Color.blue)
                         .cornerRadius(8)
                         .foregroundColor(.light)
                     })
@@ -91,7 +91,6 @@ struct PermissionsView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
         .sheet(isPresented: $isPickerPresented) {
             // TODO: small delay on first load on real device
             ImagePicker(didFinishSelection: { media in

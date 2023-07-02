@@ -49,7 +49,7 @@ struct EditorView: View {
     @State var fontSize: Float = 50.0
     
     /// Hint text showing at bottom when no text added/selected
-    @State var infoText: String = "Tap plus to add text"
+    @State var infoText: String = "Tap to add text"
     
     /// Current text view alignment
     @State var textAlignment: NSTextAlignment = .center
@@ -187,18 +187,6 @@ struct EditorView: View {
                     .padding(.all, 8)
                     .animation(.spring())
                     .disabled(!canUndo)
-                    
-                    // Aspect ratio switcher
-                    if !(media.type == .video) {
-                        // showing before any changes are done
-                        if (!canUndo) {
-                            Button(action: {
-                                contentMode = contentMode == .fit ? .fill : .fit
-                            }) {
-                                CircleIcon(systemName: contentMode == .fit ? "aspectratio" : "aspectratio.fill").padding(.all, 4)
-                            }.animation(.spring())
-                        }
-                    }
                 }
                 .disabled(isProcesing)
                        
@@ -273,33 +261,7 @@ struct EditorView: View {
                         }
                         .pickerStyle(.segmented)
                         .onChange(of: mode, perform: modeChanged)
-                        
-                        // Shapes button
-                        if (mode == .draw) {
-                            DropDown(items: [
-                                DropDownItem(action: {
-                                    canvas.drawShape(.ellipsis)
-                                }, systemName: "circle"),
-                                
-                                DropDownItem(action: {
-                                    canvas.drawShape(.rectangle)
-                                }, systemName: "square"),
-                                
-                                DropDownItem(action: {
-                                    canvas.drawShape(.triangle)
-                                }, systemName: "triangle"),
-                                
-                                DropDownItem(action: {
-                                    canvas.drawShape(.star)
-                                }, systemName: "star")
-                            ]).padding(.leading, 4)
-                        } else {
-                            // Spacer().frame(width: 52)
-                            Button(action: addText) {
-                                CircleIcon(systemName: "plus")
-                            }.padding(.leading, 4)
-                        }
-                        
+
                         // Save button
                         Button(action: export) {
                             CircleIcon(systemName: "arrow.down", disabled: !canUndo, hidden: isProcesing)
@@ -326,7 +288,6 @@ struct EditorView: View {
                                 Color.dark.blendMode(BlendMode.sourceAtop).edgesIgnoringSafeArea(.all)
                                 if (selectedTextView != nil) {
                                     HStack {
-                                        // Spacer().frame(width: 60)
                                         
                                         // Text background color picker
                                         Button(action: colorTapped) {
@@ -340,11 +301,18 @@ struct EditorView: View {
                                                 .padding(.trailing, 5)
                                         }
                                         
-                                        Image(systemName: "textformat.size")
-                                            .frame(width: 36, height: 36)
-                                            .foregroundColor(.light)
-                                            .padding(.top, 4)
-                                            .padding(.bottom, 4)
+                                        // Text Background switcher
+                                        Button(action: textStyleTapped) {
+                                            Image(systemName: "character")
+                                                .frame(width: 34, height: 34)
+                                                .foregroundColor(textStyle == .fill ? .dark : .light)
+                                                .background(textStyle == .fill ? Color.light : Color.darkHighlight)
+                                                .clipShape(Circle())
+                                                .overlay(
+                                                    Circle().stroke(textStyle == .none ? Color.darkHighlight : Color.light, lineWidth: 2)
+                                                )
+                                        }
+                                        .padding(.vertical, 4)
                                         
                                         // Brush size slider
                                         FontSlider(
@@ -363,35 +331,20 @@ struct EditorView: View {
                                                 .padding(.all, 4)
                                         }
                                         
-                                        // Text Background switcher
-                                        Button(action: textStyleTapped) {
-                                            Image(systemName: "character")
-                                                .frame(width: 34, height: 34)
-                                                .foregroundColor(textStyle == .fill ? .dark : .light)
-                                                .background(textStyle == .fill ? Color.light : Color.darkHighlight)
-                                                .clipShape(Circle())
-                                                .overlay(
-                                                    Circle().stroke(textStyle == .none ? Color.darkHighlight : Color.light, lineWidth: 2)
-                                                )
+                                        Button(action: addText) {
+                                            CircleIcon(systemName: "plus")
                                         }
-                                        .padding(.vertical, 4)
+                                        .padding(.leading, 4)
                                         .padding(.trailing, 14)
-                                        
-                                        // Edit text button
-                                        /*Button(action: {
-                                         guard let label = selectedTextView as? UILabel else { return }
-                                         canvasController?.editTextView(label)
-                                         }) {
-                                         CircleIcon(systemName: "pencil")
-                                         .padding(.vertical, 4)
-                                         .padding(.trailing, 12)
-                                         }*/
-                                        
-                                        // Spacer().frame(width: 56)
                                     }
                                 } else {
                                     // Text hint
                                     Text(!isTextVisible ? "Hide text mode is active" : infoText).fontWeight(.bold).foregroundColor(.light)
+                                        .onTapGesture {
+                                            if isTextVisible {
+                                                addText()
+                                            }
+                                        }
                                 }
                             }
                         }
@@ -401,18 +354,6 @@ struct EditorView: View {
                 }
             }
             .background(Color.dark.edgesIgnoringSafeArea(.all))
-            
-            // Separator similar to PKToolPicker one
-            VStack {
-                Spacer()
-                Rectangle()
-                    .fill(Color(red: 64/255, green: 64/255, blue: 67/255))
-                    .frame(height: 1)
-                    .offset(y: -34)
-            }
-            .edgesIgnoringSafeArea(.bottom)
-            .opacity(mode == .text ? 1.0 : 0.0)
-            .animation(.easeInOut(duration: 0.5))
         }
         .navigationBarHidden(true)
         .preferredColorScheme(.dark)
@@ -534,7 +475,7 @@ struct EditorView: View {
             canvasController = canvas.parentViewController as? CanvasViewController<Canvas>
         }
         
-        canvasController?.showTextAlert(title: "Add text", subtitle: "Type your thoughts here", text: nil, actionTitle: "Add") { text in
+        canvasController?.showTextAlert(title: "Add text", text: nil, actionTitle: "Add") { text in
             addTextView(text)
         }
     }
@@ -756,7 +697,7 @@ struct EditorView: View {
             })
             
             let labels: [UIView] = canvasController?.view.subviews.filter { $0 is UILabel } ?? []
-            infoText = labels.isEmpty ? "Tap plus to add text" : "Tap any text to customize"
+            infoText = labels.isEmpty ? "Tap to add text" : "Tap any text to customize"
             
             canvasController?.selectionEnabled = true
         } else {
@@ -797,17 +738,11 @@ struct EditorView: View {
         let label = TextLabel(frame: CGRect(x: controller.view.center.x - 128, y: controller.view.center.y - 64, width: 256, height: 128))
         label.accessibilityIdentifier = "textview_\(Int.random(in: 0..<65536))"
         label.numberOfLines = 0
-        // label.lineBreakMode = .byWordWrapping
         
         label.text = text
         label.textColor = .white
         label.textAlignment = .center
-        
-        // resize depending on text
-        //let width = text.width(withConstrainedHeight: 128, font: label.font) + 32
-        //let height = text.height(withConstrainedWidth: 256, font: label.font) + 24
-        //label.frame = CGRect(x: label.frame.minX, y: label.frame.minY, width: width, height: height)
-        //label.sizeThatFits(CGSize(width: width, height: height))
+
         let labelSize = label.intrinsicContentSize
         label.bounds.size = CGSize(width: labelSize.width + 32, height: labelSize.height + 24)
         
@@ -845,10 +780,9 @@ struct EditorView: View {
         selectedTextView = view
                                     
         let label = view as? UILabel
-        
-        // font size from 12 to 64, default to 17
+
         let pointSize = Float(label?.font.pointSize ?? 17.0)
-        fontSize = ((pointSize - 12.0) * 100.0) / 52.0 // 52 = 64 max - 12 min
+        fontSize = ((pointSize - 12.0) * 100.0) / 52.0
         
         textAlignment = label?.textAlignment ?? .center
         
@@ -861,7 +795,6 @@ struct EditorView: View {
             break
         case .fill:
             fillColor = label?.backgroundColor ?? .white
-            //fillColor = UIColor(cgColor: label?.layer.backgroundColor ?? UIColor.white.cgColor)
             break
         }
         
@@ -884,4 +817,3 @@ struct EditorView_Previews: PreviewProvider {
         EditorView(media: MediaItem(type: .image, image: UIImage(named: "venice"), video: nil, videoUrl: nil), onClose: { })
     }
 }
-
